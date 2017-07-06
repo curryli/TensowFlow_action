@@ -1,0 +1,34 @@
+http://blog.csdn.net/nnnnnnnnnnnny/article/details/70244232
+此例程出自《TensorFlow实战Google深度学习框架》6.5.2小节 卷积神经网络迁移学习。 
+数据集来自http://download.tensorflow.org/example_images/flower_photos.tgz ，
+
+及谷歌提供的Inception-v3模型https://storage.googleapis.com/download.tensorflow.org/models/inception_dec_2015.zip 。 自行下载和解压。 
+解压后的文件夹包含5个子文件夹，每个子文件夹的名称为一种花的名称，代表了不同的类别。 
+工程目录：
+
+-transfer_learning
+    -flower_data  //存放原始图片的文件夹，有5个子文件夹， 每个子文件夹的名称为一种花的名称  github里面没传上来
+        -daisy   //daisy类花图片的文件夹
+        -dandelion
+        -roses
+        -sunflowers
+        -tulips
+        -LICENSE.txt
+
+    -model   //存放模型的文件夹
+        -imagenet_comp_graph_label_strings.txt
+        -LICENSE
+        -tensorflow_inception_graph.pb   //模型文件
+    
+
+自己建一个空文件夹（mkdir）
+    -tmp
+        -bottleneck  //保存模型瓶颈层的特征结果
+            -daisy   //daisy类花特征的文件夹
+            -dandelion
+            -roses
+            -sunflowers
+            -tulips
+
+
+    -transfer_flower.py  //所有的程序都在这里了
