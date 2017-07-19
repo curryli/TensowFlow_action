@@ -1,10 +1,37 @@
 # load MNIST data
 import input_data
+import numpy as np
 mnist = input_data.read_data_sets("data/", one_hot=True)
 
 # start tensorflow interactiveSession
 import tensorflow as tf
 sess = tf.InteractiveSession()
+
+index_in_epoch = 0
+num_examples = mnist.train._num_examples
+#print num_examples
+
+images = mnist.train._images
+labels = mnist.train._labels
+#https://stackoverflow.com/questions/41454511/tensorflow-how-is-dataset-train-next-batch-defined
+def get_next_batch(data, batch_size, index_in_epoch, images, labels):
+    start = index_in_epoch
+    index_in_epoch = index_in_epoch + batch_size
+    images = mnist.train._images
+    labels = mnist.train._labels
+    if index_in_epoch > num_examples:
+      # Shuffle the data
+      perm = np.arange(num_examples)
+      np.random.shuffle(perm)
+      images = data._images[perm]
+      labels = data._labels[perm]
+      # Start next epoch
+      start = 0
+      index_in_epoch = batch_size
+      
+    end = index_in_epoch
+    return images[start:end], labels[start:end]
+
 
 # weight initialization
 def weight_variable(shape):
@@ -21,6 +48,7 @@ def conv2d(x, W):
 # pooling
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
 
 # Create the model
 # placeholder
@@ -76,15 +104,16 @@ saver = tf.train.Saver()
 #sess.run(tf.initialize_all_variables())
 sess.run(tf.global_variables_initializer())
 
-
-Epochs = 5000
+ 
+Epochs = 10000
 Batch_size = 50
 for i in range(Epochs):
-    batch = mnist.train.next_batch(50)
+    #batch = mnist.train.next_batch(50)
+    batch = get_next_batch(mnist.train, Batch_size, index_in_epoch, images, labels)
     if i%100 == 0:
         train_accuracy = accuracy.eval(feed_dict={x:batch[0], y_:batch[1], keep_prob:1.0})
         print "step %d, train accuracy %g" %(i, train_accuracy)
-    train_step.run(feed_dict={x:batch[0], y_:batch[1], keep_prob:0.5})
+    sess.run(train_step,feed_dict={x:batch[0], y_:batch[1], keep_prob:0.5})
 
 save_path = saver.save(sess, "model2.ckpt")
 print "test accuracy %g" % accuracy.eval(feed_dict={x:mnist.test.images, y_:mnist.test.labels, keep_prob:1.0})
