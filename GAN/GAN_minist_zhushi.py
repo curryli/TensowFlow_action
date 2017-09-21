@@ -187,7 +187,7 @@ class MNIST_DCGAN(object):
             #同时固定 D 的参数  (这里没看懂，好像没有固定D的参数？应该要固定)
             #为了最小化损失函数a_loss，此时就只能改变 G 的每一层权重，反复迭代后 G的生成能力因此得以改进。
             y = np.ones([batch_size, 1])
-            noise_train = np.random.uniform(-1.0, 1.0, size=[batch_size, 100])  #这句话好像可以不要，直接用这一轮已经生成的noise_gen训练即可，下一轮再重新生成，不过多生成一次好像更准
+            noise_train = np.random.uniform(-1.0, 1.0, size=[batch_size, 100])  #利用G再生成一批generated_image
             a_loss = self.adversarial.train_on_batch(noise_train, y)
             
             

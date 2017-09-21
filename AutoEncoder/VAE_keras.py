@@ -1,5 +1,5 @@
 '''''This script demonstrates how to build a variational autoencoder with Keras. 
- 
+https://github.com/fchollet/keras/blob/master/examples/variational_autoencoder.py 
 Reference: "Auto-Encoding Variational Bayes" https://arxiv.org/abs/1312.6114 
 '''  
 import numpy as np  
@@ -32,7 +32,7 @@ epsilon_std = 1.0
   
 #my tips:encoding  
 x = Input(batch_shape=(batch_size, original_dim))  
-h = Dense(intermediate_dim, activation='relu')(x)  
+h = Dense(intermediate_dim, activation='relu')(x)   #keras_VAE_main.png图中Q(z|x)
 z_mean = Dense(latent_dim)(h)  
 z_log_var = Dense(latent_dim)(h)  
   
@@ -45,19 +45,19 @@ def sampling(args):
   
 # note that "output_shape" isn't necessary with the TensorFlow backend  
 # my tips:get sample z(encoded)  
-z = Lambda(sampling, output_shape=(latent_dim,))([z_mean, z_log_var])  
+z = Lambda(sampling, output_shape=(latent_dim,))([z_mean, z_log_var])   #图中z
   
 # we instantiate these layers separately so as to reuse them later  
 decoder_h = Dense(intermediate_dim, activation='relu')  
 decoder_mean = Dense(original_dim, activation='sigmoid')  
-h_decoded = decoder_h(z)  
-x_decoded_mean = decoder_mean(h_decoded)  
+h_decoded = decoder_h(z)   #图中f(z)
+x_decoded_mean = decoder_mean(h_decoded)    #图中最后一个x
   
-#my tips:loss(restruct X)+KL  
+#my tips:loss(restruct X)+KL   目标函数有两项   
 def vae_loss(x, x_decoded_mean):  
-      #my tips:logloss  
+      #my tips:logloss   一项与自动编码器相同，要求从f(z)出来的样本重构原来的输入样本   由重构x与输入x均方差或逐点的交叉熵衡量
     xent_loss = original_dim * objectives.binary_crossentropy(x, x_decoded_mean)  
-    #my tips:see paper's appendix B  
+    #my tips:see paper's appendix B    另一项 要求经过Q(z|x)估计出的隐变量分布接近于标准正态分布    由衡量两个分布的相似度，当然是大名鼎鼎的KL距离。二是近似后验与真实后验的KL散度，至于KL散度为何简化成代码中的形式，看论文《Auto-Encoding Variational Bayes》中的附录B有证明。
     kl_loss = - 0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)  
     return xent_loss + kl_loss  
   
@@ -101,7 +101,7 @@ plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=y_test)
 plt.colorbar()  
 plt.show()  
   
-# build a digit generator that can sample from the learned distribution  
+# build a digit generator that can sample from the learned distribution  使用vae  跟普通自动编码器不一样，我们这里只需要 剪掉编码器部分，直接把正态分布样本送入解码器即可
 decoder_input = Input(shape=(latent_dim,))  
 _h_decoded = decoder_h(decoder_input)  
 _x_decoded_mean = decoder_mean(_h_decoded)  
